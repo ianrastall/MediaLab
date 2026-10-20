@@ -1,0 +1,211 @@
+<Window x:Class="ImageLab.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ImageLab.UI.ViewModels"
+        xmlns:conv="clr-namespace:Lab.UI.Converters;assembly=Lab.UI"
+        Title="ImageLab" Height="860" Width="1240"
+        Background="{StaticResource WindowBackgroundBrush}"
+        Icon="pack://application:,,,/Resources/icon-imagelab.png"
+        FontFamily="Segoe UI">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <conv:NullOrEmptyToVisibilityConverter x:Key="NullToVis" />
+    </Window.Resources>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="240" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="180" MinHeight="100" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="ImageLab" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" />
+            <Border DockPanel.Dock="Right" Padding="8,3" CornerRadius="4" VerticalAlignment="Center"
+                    Background="{StaticResource ControlBackgroundBrush}">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="9" Height="9" VerticalAlignment="Center" Margin="0,0,6,0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{StaticResource AccentBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Tools.AllPresent}" Value="True">
+                                        <Setter Property="Fill" Value="#FF4CAF50" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="{Binding Tools.StatusText}" Style="{StaticResource SubtleTextBlockStyle}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </DockPanel>
+
+        <!-- Main -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: controls -->
+            <Border Grid.Column="0" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Source" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Edit.SourcePath}" IsReadOnly="True" VerticalContentAlignment="Center" />
+                            <Button Grid.Column="2" Content="Open…" Command="{Binding Edit.PickSourceCommand}" />
+                        </Grid>
+                        <TextBlock Text="{Binding Edit.SourceDimensionsText}" Style="{StaticResource SubtleTextBlockStyle}" Margin="0,0,0,12" />
+
+                        <TextBlock Text="Output" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Edit.OutputPath}" VerticalContentAlignment="Center" />
+                            <Button Grid.Column="2" Content="Save as…" Command="{Binding Edit.PickOutputCommand}" />
+                        </Grid>
+
+                        <!-- Canvas / resize -->
+                        <TextBlock Text="Canvas" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="Fit:" Style="{StaticResource SubtleTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox Width="120" ItemsSource="{Binding Edit.ResizeModes}" SelectedItem="{Binding Edit.SelectedResizeMode}" />
+                            <TextBlock Text="W" Style="{StaticResource SubtleTextBlockStyle}" VerticalAlignment="Center" Margin="12,0,4,0" />
+                            <TextBox Width="60" Text="{Binding Edit.TargetWidth, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="H" Style="{StaticResource SubtleTextBlockStyle}" VerticalAlignment="Center" Margin="8,0,4,0" />
+                            <TextBox Width="60" Text="{Binding Edit.TargetHeight, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <!-- Crop -->
+                        <CheckBox Content="Crop" IsChecked="{Binding Edit.CropEnabled}" Margin="0,6,0,4" />
+                        <UniformGrid Columns="4" Margin="0,0,0,12" IsEnabled="{Binding Edit.CropEnabled}">
+                            <StackPanel Margin="0,0,4,0"><TextBlock Text="X" Style="{StaticResource SubtleTextBlockStyle}" /><TextBox Text="{Binding Edit.CropX, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
+                            <StackPanel Margin="0,0,4,0"><TextBlock Text="Y" Style="{StaticResource SubtleTextBlockStyle}" /><TextBox Text="{Binding Edit.CropY, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
+                            <StackPanel Margin="0,0,4,0"><TextBlock Text="W" Style="{StaticResource SubtleTextBlockStyle}" /><TextBox Text="{Binding Edit.CropWidth, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
+                            <StackPanel><TextBlock Text="H" Style="{StaticResource SubtleTextBlockStyle}" /><TextBox Text="{Binding Edit.CropHeight, UpdateSourceTrigger=PropertyChanged}" /></StackPanel>
+                        </UniformGrid>
+
+                        <!-- Color adjustments -->
+                        <TextBlock Text="Adjustments" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <ContentControl>
+                            <StackPanel>
+                                <!-- reusable slider rows -->
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Brightness" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Minimum="-100" Maximum="100" Value="{Binding Edit.Brightness}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Brightness}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Contrast" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Minimum="-100" Maximum="100" Value="{Binding Edit.Contrast}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Contrast}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Gamma" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Minimum="0.2" Maximum="3.0" Value="{Binding Edit.Gamma}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Gamma, StringFormat={}{0:0.00}}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Saturation" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Minimum="0" Maximum="200" Value="{Binding Edit.Saturation}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Saturation}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Chroma" VerticalAlignment="Center" ToolTip="Hue rotation (modulate hue axis)"/>
+                                    <Slider Grid.Column="1" Minimum="0" Maximum="200" Value="{Binding Edit.Chroma}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Chroma}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Red" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Minimum="-100" Maximum="100" Value="{Binding Edit.Red}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Red}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Green" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Minimum="-100" Maximum="100" Value="{Binding Edit.Green}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Green}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="80"/><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Blue" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Minimum="-100" Maximum="100" Value="{Binding Edit.Blue}"/>
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding Edit.Blue}"/>
+                                </Grid>
+                            </StackPanel>
+                        </ContentControl>
+
+                        <Button Content="Export image" Style="{StaticResource AccentButtonStyle}" Margin="0,14,0,0"
+                                HorizontalAlignment="Left" Command="{Binding Edit.ExportCommand}" />
+                        <TextBlock Text="{Binding Edit.StatusText}" Style="{StaticResource SubtleTextBlockStyle}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Right: live preview -->
+            <Border Grid.Column="2" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Live preview" Style="{StaticResource HeaderTextBlockStyle}" />
+                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4" Background="#FF101010">
+                        <Grid>
+                            <Image Source="{Binding Edit.PreviewSource}" Stretch="Uniform" StretchDirection="Both" />
+                            <TextBlock Text="Open an image to preview" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="{StaticResource SubtleForegroundBrush}" FontSize="16"
+                                       Visibility="{Binding Edit.PreviewSource, Converter={StaticResource NullToVis}}" />
+                        </Grid>
+                    </Border>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <!-- Divider -->
+        <GridSplitter Grid.Row="2" Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      Background="Transparent" ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Cursor="SizeNS" Margin="0,4" />
+
+        <!-- Log -->
+        <Border Grid.Row="3" Background="#FF181818" CornerRadius="6" Padding="10"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                    <TextBlock Text="Log" Style="{StaticResource HeaderTextBlockStyle}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Copy" Command="{Binding Terminal.CopyCommand}" Padding="8,3" />
+                        <Button Content="Clear" Command="{Binding Terminal.ClearCommand}" Padding="8,3" Margin="6,0,0,0" />
+                    </StackPanel>
+                </DockPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Terminal.Lines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Style="{StaticResource LogTextStyle}" TextWrapping="NoWrap" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

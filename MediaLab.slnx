@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="SongLab/SongLab.csproj" />
+  <Project Path="ImageLab/ImageLab.csproj" />
+  <Project Path="Lab.Core/Lab.Core.csproj" />
+  <Project Path="Lab.UI/Lab.UI.csproj" />
+  <Project Path="LyricsLab/LyricsLab.csproj" />
+  <Project Path="MediaLab.Hub/MediaLab.Hub.csproj" />
+  <Project Path="MediaLab.Tests/MediaLab.Tests.csproj" />
+  <Project Path="VideoLab/VideoLab.csproj" />
+</Solution>

@@ -1,0 +1,21 @@
+# Visual Studio
+.vs/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+Build/
+TestResults/
+
+# Downloaded CLI Tools
+tools/
+
+# Snapshots
+snapshot.md
+
+# Third-party tool archives (fetched by the in-app Setup window instead)
+/*.zip
+
+# Lyric texts used for local testing (not for redistribution)
+/creep.txt
+/smasmolytic.txt

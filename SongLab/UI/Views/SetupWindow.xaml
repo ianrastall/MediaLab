@@ -1,0 +1,114 @@
+<Window x:Class="SongLab.UI.Views.SetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:SongLab.UI.ViewModels"
+        Title="SongLab Setup" Height="480" Width="550"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="{StaticResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
+    <Window.DataContext>
+        <vm:SetupViewModel />
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Mastering Tools Setup" Style="{StaticResource HeaderTextBlockStyle}" FontSize="20" Margin="0,0,0,16" />
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- FFmpeg -->
+                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="FFmpeg (ffmpeg.exe)" FontWeight="Bold" Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding FfmpegStatusText}" Style="{StaticResource SubtleTextBlockStyle}" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Install" Command="{Binding InstallFfmpegCommand}" Width="80" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- SoX -->
+                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="SoX (sox.exe)" FontWeight="Bold" Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding SoxStatusText}" Style="{StaticResource SubtleTextBlockStyle}" />
+                            <TextBlock Text="Required for DSP filters (EQ, Pass filters)." Style="{StaticResource SubtleTextBlockStyle}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Install" Command="{Binding InstallSoxCommand}" Width="80" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- Rubber Band -->
+                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Rubber Band (rubberband-r3.exe)" FontWeight="Bold" Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding RubberbandStatusText}" Style="{StaticResource SubtleTextBlockStyle}" />
+                            <TextBlock Text="Required for high-quality time-stretching." Style="{StaticResource SubtleTextBlockStyle}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Install" Command="{Binding InstallRubberbandCommand}" Width="80" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- rsgain -->
+                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="rsgain (rsgain.exe)" FontWeight="Bold" Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding RsgainStatusText}" Style="{StaticResource SubtleTextBlockStyle}" />
+                            <TextBlock Text="Required for loudness normalization (LUFS target)." Style="{StaticResource SubtleTextBlockStyle}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Install" Command="{Binding InstallRsgainCommand}" Width="80" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <Button Content="Open tools folder..." Command="{Binding OpenInstallFolderCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Progress and Log -->
+        <Border Grid.Row="2" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16" Margin="0,16,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding ProgressText}" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Content="Cancel" Command="{Binding CancelDownloadCommand}" Width="60" />
+                </Grid>
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding ProgressValue}" Height="4" Margin="0,0,0,8" />
+                <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
+                    <TextBlock Text="{Binding LogText}" Style="{StaticResource LogTextStyle}" TextWrapping="Wrap" />
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

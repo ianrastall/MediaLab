@@ -1,0 +1,38 @@
+<Project>
+
+  <!--
+    Shared build settings for the MediaLab suite.
+    Per the suite engineering rules: Windows 10/11 x64 only, C# 14, nullable on.
+    Individual projects still own their TargetFramework and UseWPF flags.
+  -->
+  <PropertyGroup>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- x64-only suite. PlatformTarget forces 64-bit binaries; we deliberately do NOT set
+         <Platforms> because that makes projects x64-only and the .slnx then maps them to a
+         "bin\x64\..." subfolder inconsistently across projects. PlatformTarget alone keeps a
+         uniform "bin\Debug\..." output path while still producing x64 assemblies. RID is
+         applied at publish time. -->
+    <PlatformTarget>x64</PlatformTarget>
+
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <!--
+    Runnable apps build straight into a single top-level "Build\<App>\" folder — the exe sits
+    right there, not buried under bin\Debug\net10.0-windows. Each app gets its own subfolder so
+    they stay self-contained (no shared-file write races during a parallel solution build).
+    Libraries (Lab.Core/Lab.UI) and the test project keep their default bin/obj; their DLLs are
+    still copied into each app's Build folder as dependencies. Note: the Configuration is not in
+    the path, so a Release build overwrites a Debug build in the same folder (fine for the
+    Debug-centric dev workflow; publish elsewhere for releases). Add new apps to this list.
+  -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'SongLab' Or '$(MSBuildProjectName)' == 'VideoLab' Or '$(MSBuildProjectName)' == 'LyricsLab' Or '$(MSBuildProjectName)' == 'ImageLab' Or '$(MSBuildProjectName)' == 'MediaLab.Hub'">
+    <OutputPath>$(MSBuildThisFileDirectory)Build\$(MSBuildProjectName)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+</Project>

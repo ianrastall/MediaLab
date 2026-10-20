@@ -1,0 +1,225 @@
+<Window x:Class="VideoLab.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:VideoLab.UI.ViewModels"
+        xmlns:labui="clr-namespace:Lab.UI.Controls;assembly=Lab.UI"
+        xmlns:conv="clr-namespace:Lab.UI.Converters;assembly=Lab.UI"
+        Title="VideoLab" Height="820" Width="1180"
+        Background="{StaticResource WindowBackgroundBrush}"
+        Icon="pack://application:,,,/Resources/icon-videolab.png"
+        FontFamily="Segoe UI">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <conv:ColorToBrushConverter x:Key="ColorToBrush" />
+        <conv:NullOrEmptyToVisibilityConverter x:Key="NullToVis" />
+    </Window.Resources>
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="220" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="300" MinHeight="120" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="VideoLab" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" />
+            <Border DockPanel.Dock="Right" Padding="8,3" CornerRadius="4" VerticalAlignment="Center"
+                    Background="{StaticResource ControlBackgroundBrush}">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="9" Height="9" VerticalAlignment="Center" Margin="0,0,6,0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="{StaticResource AccentBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Tools.AllPresent}" Value="True">
+                                        <Setter Property="Fill" Value="#FF4CAF50" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="{Binding Tools.StatusText}" Style="{StaticResource SubtleTextBlockStyle}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </DockPanel>
+
+        <!-- Main content: left controls, right preview -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420" MinWidth="320" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="*" MinWidth="320" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: controls -->
+            <Border Grid.Column="0" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Audio -->
+                        <TextBlock Text="Audio" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Render.AudioPath}" IsReadOnly="True" VerticalContentAlignment="Center" />
+                            <Button Grid.Column="2" Content="Browse…" Command="{Binding Render.PickAudioCommand}" />
+                        </Grid>
+
+                        <!-- Image -->
+                        <TextBlock Text="Image" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Render.ImagePath}" IsReadOnly="True" VerticalContentAlignment="Center" />
+                            <Button Grid.Column="2" Content="Browse…" Command="{Binding Render.PickImageCommand}" />
+                        </Grid>
+                        <TextBlock Text="Must be exactly 3840 × 2160." Style="{StaticResource SubtleTextBlockStyle}" Margin="0,4,0,12" />
+
+                        <!-- Output -->
+                        <TextBlock Text="Output MP4" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding Render.OutputPath}" VerticalContentAlignment="Center" />
+                            <Button Grid.Column="2" Content="Save as…" Command="{Binding Render.PickOutputCommand}" />
+                        </Grid>
+
+                        <!-- Color -->
+                        <TextBlock Text="Visualizer color" Style="{StaticResource HeaderTextBlockStyle}" />
+                        <labui:DarkColorPicker SelectedColor="{Binding Render.SelectedColor, Mode=TwoWay}" />
+
+                        <!-- Derived peak + opacity -->
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4"
+                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                    Background="{Binding Render.PeakColor, Converter={StaticResource ColorToBrush}}" />
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource SubtleTextBlockStyle}">
+                                    <Run Text="Peak/accent (30% darker):" />
+                                    <Run Text="{Binding Render.PeakHex, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource SubtleTextBlockStyle}">
+                                    <Run Text="Visualizer opacity:" />
+                                    <Run Text="{Binding Render.OpacityDisplay, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Render / cancel -->
+                        <Grid Margin="0,18,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="Render" Style="{StaticResource AccentButtonStyle}"
+                                    Command="{Binding Render.RenderCommand}" />
+                            <Button Grid.Column="2" Content="Cancel" Command="{Binding Render.CancelCommand}" />
+                        </Grid>
+
+                        <!-- Progress -->
+                        <ProgressBar Margin="0,14,0,6" Minimum="0" Maximum="100" Value="{Binding Render.ProgressPercent}" />
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding Render.ElapsedText}" FontFamily="Cascadia Mono, Consolas"
+                                       Foreground="{StaticResource ForegroundBrush}" />
+                            <TextBlock Text="{Binding Render.StatusText}" Style="{StaticResource SubtleTextBlockStyle}" TextWrapping="Wrap" />
+                        </DockPanel>
+
+                        <Button Content="Open output folder" Margin="0,12,0,0" HorizontalAlignment="Left"
+                                Command="{Binding Render.OpenOutputFolderCommand}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Draggable divider between the controls and preview -->
+            <GridSplitter Grid.Column="1" Width="14" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          Background="Transparent" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns"
+                          Cursor="SizeWE" />
+
+            <!-- Right: preview -->
+            <Border Grid.Column="2" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="6" Padding="16">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Preview" Style="{StaticResource HeaderTextBlockStyle}" />
+                    <!-- Viewbox locks the preview to the output's 16:9 frame, so the image and the
+                         bar overlay scale together and the bars align to the image edges. -->
+                    <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="1920" Height="1080" Background="#FF101010"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <Grid>
+                                <Image Source="{Binding Render.ImagePath, TargetNullValue={x:Null}}" Stretch="Uniform" />
+                                <TextBlock Text="No image selected" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="36" Foreground="{StaticResource SubtleForegroundBrush}"
+                                           Visibility="{Binding Render.ImagePath, Converter={StaticResource NullToVis}}" />
+
+                                <!-- Static 40-bar overlay preview (heights are in the 1080 frame) -->
+                                <ItemsControl ItemsSource="{Binding Render.PreviewBars}" VerticalAlignment="Stretch" Opacity="0.5">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1" Columns="40" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Rectangle VerticalAlignment="Bottom" Margin="3,0"
+                                                       Height="{Binding}"
+                                                       Fill="{Binding DataContext.Render.SelectedColor,
+                                                              RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                                              Converter={StaticResource ColorToBrush}}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Border>
+                    </Viewbox>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <!-- Draggable divider between content and log -->
+        <GridSplitter Grid.Row="2" Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      Background="Transparent" ResizeBehavior="PreviousAndNext" ResizeDirection="Rows"
+                      Cursor="SizeNS" Margin="0,4" />
+
+        <!-- Bottom: terminal -->
+        <Border Grid.Row="3" Background="#FF181818" CornerRadius="6" Padding="10"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                    <TextBlock Text="Log" Style="{StaticResource HeaderTextBlockStyle}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Copy" Command="{Binding Terminal.CopyCommand}" Padding="8,3" />
+                        <Button Content="Clear" Command="{Binding Terminal.ClearCommand}" Padding="8,3" Margin="6,0,0,0" />
+                    </StackPanel>
+                </DockPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Terminal.Lines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Style="{StaticResource LogTextStyle}" TextWrapping="NoWrap" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
