@@ -8,7 +8,7 @@ Build/
 TestResults/
 
 # Downloaded CLI Tools
-tools/
+/tools/
 
 # Snapshots
 snapshot.md
